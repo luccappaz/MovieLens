@@ -13,25 +13,25 @@ echo -e "${VERDE} Initiating the Silver Layer pipeline...${NC}"
 echo "----------------------------------------"
 
 echo "🎬 Processing 'movies.csv'..."
-if ! uv run "$PROJECT_ROOT/transformation/movies.py" > /dev/null 2>&1; then
+if ! uv run "$PROJECT_ROOT/transformations/movies.py" > /dev/null 2>&1; then
     echo -e "${VERMELHO}⚠️ WARNING: Critical failure at processing Movies. Aborting...${NC}"
     exit 1
 fi
 
 echo "⭐ Processing 'ratings.csv'..."
-if ! uv run "$PROJECT_ROOT/transformation/ratings.py" > /dev/null 2>&1; then
+if ! uv run "$PROJECT_ROOT/transformations/ratings.py" > /dev/null 2>&1; then
     echo -e "${VERMELHO}⚠️ WARNING: Critical failure at processing Ratings. Aborting...${NC}"
     exit 1
 fi
 
 echo "🔗 Processing 'links.csv'..."
-if ! uv run "$PROJECT_ROOT/transformation/links.py" > /dev/null 2>&1; then
+if ! uv run "$PROJECT_ROOT/transformations/links.py" > /dev/null 2>&1; then
     echo -e "${VERMELHO}⚠️ WARNING: Critical failure at processing Links. Aborting...${NC}"
     exit 1
 fi
 
 echo "🏷️ Processing 'tags.csv'..."
-if ! uv run "$PROJECT_ROOT/transformation/tags.py" > /dev/null 2>&1; then
+if ! uv run "$PROJECT_ROOT/transformations/tags.py" > /dev/null 2>&1; then
     echo -e "${VERMELHO}⚠️ WARNING: Critical failure at processing Tags. Aborting...${NC}"
     exit 1
 fi
