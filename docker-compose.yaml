@@ -5,10 +5,15 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
     AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW_CONN_SPARK_DEFAULT: "spark://spark-master:7077?deploy_mode=client"
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    ICEBERG_REST_URI: "http://iceberg-rest:8181"
+    S3_ENDPOINT: "http://minio:9000"
   volumes:
     - ./dags:/opt/airflow/dags
     - ./airflow_logs:/opt/airflow/logs
+    - ./transformations:/opt/spark/transformations
+    - ./spark_config.py:/opt/spark/spark_config.py
   user: "${AIRFLOW_UID:-50000}:0"
   networks:
     - iceberg_net
@@ -28,6 +33,7 @@ x-spark-common: &spark-common
 services:
   postgres:
     image: postgres:16
+    container_name: postgres
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow

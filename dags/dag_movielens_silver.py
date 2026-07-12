@@ -2,6 +2,14 @@ from datetime import datetime, timedelta
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow import DAG
 
+SPARK_PACKAGES = "org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.11.0,org.apache.iceberg:iceberg-aws-bundle:1.11.0,org.apache.hadoop:hadoop-aws:3.4.0"
+
+ENV_VARS = {
+    "AWS_REGION": "us-east-1",
+    "AWS_ACCESS_KEY_ID": "admin",
+    "AWS_SECRET_ACCESS_KEY": "password",
+}
+
 default_args = {
     "owner": "lucca",
     "depends_on_past": False,
@@ -23,7 +31,10 @@ with DAG(
     process_movies = SparkSubmitOperator(
         task_id="process_movies_silver",
         application="/opt/spark/transformations/movies.py",
+        packages=SPARK_PACKAGES,
+        env_vars=ENV_VARS,
         conn_id="spark_default",
+        py_files="/opt/spark/spark_config.py",
         total_executor_cores=1,
         executor_memory="1g",
         driver_memory="1g",
@@ -33,7 +44,10 @@ with DAG(
     process_ratings = SparkSubmitOperator(
         task_id="process_ratings_silver",
         application="/opt/spark/transformations/ratings.py",
+        packages=SPARK_PACKAGES,
+        env_vars=ENV_VARS,
         conn_id="spark_default",
+        py_files="/opt/spark/spark_config.py",
         total_executor_cores=1,
         executor_memory="1g",
         driver_memory="1g",
@@ -42,7 +56,10 @@ with DAG(
     process_tags = SparkSubmitOperator(
         task_id="process_tags_silver",
         application="/opt/spark/transformations/tags.py",
+        packages=SPARK_PACKAGES,
+        env_vars=ENV_VARS,
         conn_id="spark_default",
+        py_files="/opt/spark/spark_config.py",
         total_executor_cores=1,
         executor_memory="1g",
         driver_memory="1g",
@@ -51,7 +68,10 @@ with DAG(
     process_links = SparkSubmitOperator(
         task_id="process_links_silver",
         application="/opt/spark/transformations/links.py",
+        packages=SPARK_PACKAGES,
+        env_vars=ENV_VARS,
         conn_id="spark_default",
+        py_files="/opt/spark/spark_config.py",
         total_executor_cores=1,
         executor_memory="1g",
         driver_memory="1g",

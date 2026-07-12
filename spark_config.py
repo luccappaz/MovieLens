@@ -1,4 +1,8 @@
 from pyspark.sql import SparkSession
+import os
+
+REST_URI = os.environ.get("ICEBERG_REST_URI", "http://localhost:8181")
+S3_ENDPOINT = os.environ.get("S3_ENDPOINT", "http://localhost:9000")
 
 
 def get_spark_session(app_name: str = "MovieLens_Pipeline") -> SparkSession:
@@ -6,7 +10,10 @@ def get_spark_session(app_name: str = "MovieLens_Pipeline") -> SparkSession:
         SparkSession.builder.appName(app_name)
         .config(
             "spark.jars.packages",
-            "org.apache.iceberg:iceberg-spark-runtime-4.1_2.13:1.11.0,org.apache.iceberg:iceberg-aws-bundle:1.11.0,org.apache.hadoop:hadoop-aws:3.4.0",
+            "org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.11.0,"
+            "org.apache.iceberg:iceberg-aws-bundle:1.11.0,"
+            "org.apache.hadoop:hadoop-aws:3.4.0,"
+            "software.amazon.awssdk:bundle:2.24.6",
         )
         .config(
             "spark.sql.extensions",
@@ -18,20 +25,18 @@ def get_spark_session(app_name: str = "MovieLens_Pipeline") -> SparkSession:
             "org.apache.iceberg.spark.SparkCatalog",
         )
         .config("spark.sql.catalog.my_catalog.type", "rest")
-        .config(
-            "spark.sql.catalog.my_catalog.uri", "http://localhost:8181"
-        )  # rest gate
+        .config("spark.sql.catalog.my_catalog.uri", REST_URI)  # rest gate
         .config(
             "spark.sql.catalog.my_catalog.io-impl",
             "org.apache.iceberg.aws.s3.S3FileIO",  # Official AWS client
         )  # use s3 protocol
         # Conexão com o MinIO
-        .config("spark.sql.catalog.my_catalog.s3.endpoint", "http://localhost:9000")
+        .config("spark.sql.catalog.my_catalog.s3.endpoint", S3_ENDPOINT)
         .config(
             "spark.sql.catalog.my_catalog.s3.path-style-access", "true"
         )  # Acesso apenas local
         # Hadoop Config #############################################################
-        .config("spark.hadoop.fs.s3a.endpoint", "http://localhost:9000")
+        .config("spark.hadoop.fs.s3a.endpoint", S3_ENDPOINT)
         .config("spark.hadoop.fs.s3a.path.style.access", "true")
         .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
         # Configuring Hadoop credentials
@@ -58,4 +63,5 @@ def get_spark_session(app_name: str = "MovieLens_Pipeline") -> SparkSession:
         .config("spark.sql.shuffle.partitions", "8")
         .getOrCreate()
     )
+    spark.sparkContext.setLogLevel("WARN")
     return spark
