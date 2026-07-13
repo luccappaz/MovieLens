@@ -86,7 +86,7 @@ movielens_project/
 │   ├── links.py
 │   └── als_recommendation.py
 ├── spark_config.py             # Configuração global da Spark Session
-├── ingest_movielens_raw.py     # Script de Download do banco de dados
+├── ingestion/movielens_raw.py     # Script de Download do banco de dados
 ├── docker-compose.yaml         # Infraestrutura
 └── README.md                   # Este ficheiro
 ```

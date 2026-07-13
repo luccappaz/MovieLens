@@ -26,10 +26,12 @@ def get_recommendations(user_id: int):
     """Procura as recomendações pré-calculadas na Camada Gold"""
     try:
         return spark.sql(f"""
-            SELECT rec.movieId, m.title, m.genres, rec.score
+            SELECT l.imdbId, m.title, m.genres, m.year, rec.score
             FROM movielens.silver.movies as m
             INNER JOIN movielens.gold.als_recommendations as rec
             ON m.movieId = rec.movieId
+            INNER JOIN movielens.silver.links as l
+            ON rec.movieId = l.movieId
             WHERE rec.userId = {user_id}
             ORDER BY rec.score DESC
             LIMIT 10
@@ -43,9 +45,10 @@ def get_user_history(user_id: int):
     """Procura os filmes que o utilizador já avaliou no passado (Camada Silver)"""
     try:
         return spark.sql(f"""
-            SELECT r.movieId, m.title, m.year, m.genres, r.rating, r.timestamp
+            SELECT l.imdbId, m.title, m.year, m.genres, r.rating, r.timestamp
             FROM movielens.silver.ratings as r
             INNER JOIN movielens.silver.movies as m ON r.movieId = m.movieId
+            INNER JOIN movielens.silver.links as l ON r.movieId = l.movieId
             WHERE r.userId = {user_id}
             ORDER BY r.timestamp DESC
         """).toPandas()
@@ -72,50 +75,47 @@ if st.sidebar.button("Gerar Recomendações", type="primary"):
         df_recs = get_recommendations(user_id_input)
         df_history = get_user_history(user_id_input)
 
-    # Layout em duas colunas para o Painel Principal
-    col1, col2 = st.columns(2)
+    st.subheader("🍿 Recomendações do Modelo (Camada Gold)")
+    if df_recs is not None and not df_recs.empty:
+        # Formata a barra de progresso com base no Score do ALS
+        st.dataframe(
+            df_recs,
+            column_config={
+                "title": "Filme",
+                "genres": "Géneros",
+                "year": "Ano do Filme",
+                "score": st.column_config.ProgressColumn(
+                    "Afinidade (Score)",
+                    help="Score de previsão do algoritmo ALS",
+                    min_value=0,
+                    max_value=5,
+                    format="%.2f",
+                ),
+            },
+            hide_index=True,
+            use_container_width=True,
+        )
+    else:
+        st.warning(
+            "Nenhuma recomendação encontrada para este utilizador na camada Gold."
+        )
 
-    with col1:
-        st.subheader("🍿 Recomendações do Modelo (Camada Gold)")
-        if df_recs is not None and not df_recs.empty:
-            # Formata a barra de progresso com base no Score do ALS
-            st.dataframe(
-                df_recs[["title", "genres", "score"]],
-                column_config={
-                    "title": "Filme",
-                    "genres": "Géneros",
-                    "score": st.column_config.ProgressColumn(
-                        "Afinidade (Score)",
-                        help="Score de previsão do algoritmo ALS",
-                        min_value=0,
-                        max_value=5,
-                        format="%.2f",
-                    ),
-                },
-                hide_index=True,
-                use_container_width=True,
-            )
-        else:
-            st.warning(
-                "Nenhuma recomendação encontrada para este utilizador na camada Gold."
-            )
-
-    with col2:
-        st.subheader("📜 Últimos Filmes Avaliados (Camada Silver)")
-        if df_history is not None and not df_history.empty:
-            st.dataframe(
-                df_history[["title", "genres", "rating", "year"]],
-                column_config={
-                    "title": "Filme",
-                    "genres": "Géneros",
-                    "rating": "Nota Dada",
-                    "year": "Ano do Filme",
-                },
-                hide_index=True,
-                use_container_width=True,
-            )
-        else:
-            st.info("Este utilizador ainda não tem histórico de avaliações registado.")
+    st.divider()
+    st.subheader("📜 Últimos Filmes Avaliados (Camada Silver)")
+    if df_history is not None and not df_history.empty:
+        st.dataframe(
+            df_history,
+            column_config={
+                "title": "Filme",
+                "genres": "Géneros",
+                "rating": "Nota Dada",
+                "year": "Ano do Filme",
+            },
+            hide_index=True,
+            use_container_width=True,
+        )
+    else:
+        st.info("Este utilizador ainda não tem histórico de avaliações registado.")
 else:
     st.info(
         "Escolha um ID de utilizador na barra lateral e clique em 'Gerar Recomendações' para consultar o Lakehouse."
