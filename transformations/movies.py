@@ -17,9 +17,9 @@ def main():
         )
 
         # Making sure the Namespace exist in the Iceberg
-        spark.sql("CREATE NAMESPACE IF NOT EXISTS movielens")
+        spark.sql("CREATE NAMESPACE IF NOT EXISTS silver")
         df_silver.write.format("iceberg").mode("overwrite").saveAsTable(
-            "my_catalog.movielens.movies"
+            "movielens.silver.movies"
         )
     finally:
         spark.stop()

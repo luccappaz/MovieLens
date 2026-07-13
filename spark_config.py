@@ -19,21 +19,21 @@ def get_spark_session(app_name: str = "MovieLens_Pipeline") -> SparkSession:
             "spark.sql.extensions",
             "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions",
         )
-        # Conexão com o Iceberg REST e definindo o catálogo (the 'database')
+        # Conexão com o Iceberg REST e definindo o catálogo 'movielens'
         .config(
-            "spark.sql.catalog.my_catalog",
+            "spark.sql.catalog.movielens",
             "org.apache.iceberg.spark.SparkCatalog",
         )
-        .config("spark.sql.catalog.my_catalog.type", "rest")
-        .config("spark.sql.catalog.my_catalog.uri", REST_URI)  # rest gate
+        .config("spark.sql.catalog.movielens.type", "rest")
+        .config("spark.sql.catalog.movielens.uri", REST_URI)  # rest gate
         .config(
-            "spark.sql.catalog.my_catalog.io-impl",
+            "spark.sql.catalog.movielens.io-impl",
             "org.apache.iceberg.aws.s3.S3FileIO",  # Official AWS client
         )  # use s3 protocol
         # Conexão com o MinIO
-        .config("spark.sql.catalog.my_catalog.s3.endpoint", S3_ENDPOINT)
+        .config("spark.sql.catalog.movielens.s3.endpoint", S3_ENDPOINT)
         .config(
-            "spark.sql.catalog.my_catalog.s3.path-style-access", "true"
+            "spark.sql.catalog.movielens.s3.path-style-access", "true"
         )  # Acesso apenas local
         # Hadoop Config #############################################################
         .config("spark.hadoop.fs.s3a.endpoint", S3_ENDPOINT)
@@ -46,8 +46,8 @@ def get_spark_session(app_name: str = "MovieLens_Pipeline") -> SparkSession:
         )  # Comando para o Hadoop apenas ler as linhas abaixo
         .config("spark.hadoop.fs.s3a.access.key", "admin")
         .config("spark.hadoop.fs.s3a.secret.key", "password")
-        # Configurando "my_catalog" como padrão
-        .config("spark.sql.defaultCatalog", "my_catalog")
+        # Configurando "movielens" como padrão
+        .config("spark.sql.defaultCatalog", "movielens")
         # Definindo Systems Properties para o AWS SDK do Java, para comunicar-se com o Iceberg
         .config(
             "spark.driver.extraJavaOptions",

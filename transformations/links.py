@@ -10,10 +10,10 @@ def main():
         )
 
         df_silver = df_raw
-        spark.sql("CREATE NAMESPACE IF NOT EXISTS movielens")
+        spark.sql("CREATE NAMESPACE IF NOT EXISTS silver")
 
         df_silver.write.format("iceberg").mode("overwrite").saveAsTable(
-            "my_catalog.movielens.links"
+            "movielens.silver.links"
         )
     finally:
         spark.stop()
