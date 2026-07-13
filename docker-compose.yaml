@@ -15,6 +15,7 @@ x-airflow-common: &airflow-common
     - ./dags:/opt/airflow/dags
     - ./airflow_logs:/opt/airflow/logs
     - ./transformations:/opt/spark/transformations
+    - ./ingestions:/opt/airflow/ingestion
     - ./spark_config.py:/opt/spark/spark_config.py
   user: "${AIRFLOW_UID:-50000}:0"
   networks:

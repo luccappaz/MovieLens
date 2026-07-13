@@ -43,6 +43,7 @@ Um sistema de recomendação end-to-end construído sobre uma arquitetura modern
 #### Passo 0: Baixar os dados
 
 - Execute o script _ingest_movielens_raw.py_ que representa a camada Bronze, a ingestão de dados cru no MinIO.
+  - Ou, pode executar a DAG _movielens_bronze_ingestion_ (substituindo a DAG do Passo 2)
 
 #### Passo 1: Subir a Infraestrutura
 

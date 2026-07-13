@@ -3,9 +3,10 @@ import tempfile
 import requests
 import boto3
 from pathlib import Path
+import os
 
 MOVIE_LEN_URL = "https://files.grouplens.org/datasets/movielens/ml-32m.zip"
-MINIO_ENDPOINT = "http://localhost:9000"
+S3_ENDPOINT = os.environ.get("S3_ENDPOINT", "http://localhost:9000")
 MINIO_USER = "admin"
 MINIO_PASSWORD = "password"
 BUCKET_NAME = "warehouse"
@@ -13,7 +14,7 @@ BUCKET_NAME = "warehouse"
 # Initializing s3 client
 s3_client = boto3.client(
     "s3",
-    endpoint_url=MINIO_ENDPOINT,
+    endpoint_url=S3_ENDPOINT,
     aws_access_key_id=MINIO_USER,
     aws_secret_access_key=MINIO_PASSWORD,
 )

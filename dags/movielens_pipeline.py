@@ -1,7 +1,13 @@
 from datetime import datetime, timedelta
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator  # type: ignore
+from airflow.operators.python import PythonOperator  # type: ignore
 from airflow import DAG
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from ingestion.movielens_raw import ingestion as run_bronze_ingestion
 
 ENV_VARS = {
     "AWS_REGION": "us-east-1",
@@ -34,6 +40,26 @@ def get_spark_op(task_id: str, script: str) -> SparkSubmitOperator:
         pool="spark_pool",
     )
 
+
+with DAG(
+    "movielens_bronze_ingestion",
+    default_args=default_args,
+    description="Pipeline Bronze: Download do ZIP e Upload de CSVs no MinIO",
+    catchup=False,
+    schedule=None,
+    tags=["lakehouse", "python", "bronze", "ingestion"],
+) as dag_bronze:
+    ingest_raw_data = PythonOperator(
+        task_id="download_and_upload_movielens", python_callable=run_bronze_ingestion
+    )
+
+    trigger_silver_dag = TriggerDagRunOperator(
+        task_id="trigger_silver_processing",
+        trigger_dag_id="movielens_silver_pipeline",
+        wait_for_completion=False,
+    )
+
+    ingest_raw_data >> trigger_silver_dag  # type: ignore
 
 with DAG(
     "movielens_silver_pipeline",
