@@ -1,5 +1,7 @@
 x-airflow-common: &airflow-common
-  build: ./
+  build:
+    context: ./docker/airflow
+    dockerfile: Dockerfile
   image: my_airflow:3.3.0
   environment: &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
@@ -22,7 +24,10 @@ x-airflow-common: &airflow-common
       condition: service_healthy
 
 x-spark-common: &spark-common
-  image: apache/spark:4.0.3-scala2.13-java17-python3-r-ubuntu
+  build:
+    context: ./docker/spark
+    dockerfile: Dockerfile
+  image: my_spark:4.0.3
   user: root
   volumes:
     - ./transformations:/opt/spark/transformations

@@ -38,3 +38,15 @@ fi
 
 echo "----------------------------------------"
 echo -e "${VERDE}🏁 Silver Layer successfully concluded at MinIO!${NC}"
+
+echo -e "${VERDE} Initiating the Golden Layer pipeline...${NC}"
+echo "----------------------------------------"
+
+echo "🎬 Using ALS to get recommendations..."
+if ! uv run "$PROJECT_ROOT/transformations/als_recommendations.py" > /dev/null 2>&1; then
+    echo -e "${VERMELHO}⚠️ WARNING: Critical failure at processing the recommendations. Aborting...${NC}"
+    exit 1
+fi
+
+echo "----------------------------------------"
+echo -e "${VERDE}🏁 Golden Layer successfully concluded at MinIO!${NC}"
