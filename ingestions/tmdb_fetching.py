@@ -97,7 +97,7 @@ def fecth_tmdb(limit: int | None = 100):
 
         enriched_spark_df = spark.createDataFrame(rdd_enriched, schema=schema)
         enriched_spark_df.write.format("iceberg").mode("overwrite").saveAsTable(
-            "movielens.gold.tmdb_detais"
+            "movielens.gold.tmdb_details"
         )
     finally:
         spark.stop()

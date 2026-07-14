@@ -8,8 +8,6 @@ from pyspark.sql.functions import (
     count,
     log10,
     row_number,
-    collect_list,
-    struct,
     to_date,
     max,
     lit,
@@ -93,6 +91,7 @@ def main() -> None:
             col("userId"), col("movieId"), col("fairness_score").alias("score")
         ).withColumn("updated_at", current_timestamp())
 
+        spark.sql("CREATE NAMESPACE IF NOT EXISTS movielens.gold")
         gold_df.write.format("iceberg").mode("overwrite").saveAsTable(
             "movielens.gold.als_recommendations"
         )

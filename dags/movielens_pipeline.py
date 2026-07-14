@@ -7,7 +7,7 @@ import sys
 import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from ingestion.movielens_raw import ingestion as run_bronze_ingestion
+from ingestions.movielens_raw import ingestion as run_bronze_ingestion
 
 ENV_VARS = {
     "AWS_REGION": "us-east-1",

@@ -10,12 +10,15 @@ x-airflow-common: &airflow-common
     AIRFLOW_CONN_SPARK_DEFAULT: "spark://spark-master:7077?deploy_mode=client"
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
     ICEBERG_REST_URI: "http://iceberg-rest:8181"
+    OLLAMA_API_URL: "http://host.docker.internal:11434/api/embeddings"
     S3_ENDPOINT: "http://minio:9000"
+    SPARK_MASTER_URL: "spark://spark-master:7077"
+    POSTGRES_HOST: "postgres"
   volumes:
     - ./dags:/opt/airflow/dags
     - ./airflow_logs:/opt/airflow/logs
     - ./transformations:/opt/spark/transformations
-    - ./ingestions:/opt/airflow/ingestion
+    - ./ingestions:/opt/airflow/ingestions
     - ./spark_config.py:/opt/spark/spark_config.py
   user: "${AIRFLOW_UID:-50000}:0"
   networks:
@@ -38,7 +41,7 @@ x-spark-common: &spark-common
 
 services:
   postgres:
-    image: postgres:16
+    image: pgvector/pgvector:pg16
     container_name: postgres
     environment:
       POSTGRES_USER: airflow
@@ -46,8 +49,11 @@ services:
       POSTGRES_DB: airflow
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
+      - ./docker/postgres/initdb:/docker-entrypoint-initdb.d
     networks:
       - iceberg_net
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s
@@ -56,7 +62,7 @@ services:
     restart: always
 
   rest:
-    image: apache/iceberg-rest-fixture
+    image: tabulario/iceberg-rest:1.6.0
     container_name: iceberg-rest
     networks:
       iceberg_net:
@@ -69,6 +75,9 @@ services:
       - CATALOG_WAREHOUSE=s3://warehouse/
       - CATALOG_IO__IMPL=org.apache.iceberg.aws.s3.S3FileIO
       - CATALOG_S3_ENDPOINT=http://minio:9000
+      - CATALOG_URI=jdbc:postgresql://postgres:5432/airflow
+      - CATALOG_JDBC_USER=airflow
+      - CATALOG_JDBC_PASSWORD=airflow
 
   minio:
     image: minio/minio
