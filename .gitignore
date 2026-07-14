@@ -7,6 +7,7 @@ wheels/
 *.egg-info
 minio_data/
 airflow_logs/
+.env
 
 # Virtual environments
 .venv
