@@ -48,7 +48,7 @@ def init_vector_db():
     cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
     cur.execute(""" 
         CREATE TABLE IF NOT EXISTS movie_embeddings (
-            movieId INTEGER PRIMARY KEY.
+            movieId INTEGER PRIMARY KEY,
             title VARCHAR(255),
             genres VARCHAR(255),
             overview TEXT,
@@ -68,7 +68,7 @@ def run_vectorization():
     tmdb_df = spark.table("movielens.gold.tmdb_details")
 
     enriched_movies = movies_df.join(tmdb_df, how="INNER", on="movieId").filter(
-        "overview IS NOT NONE AND overview != ''"
+        "overview IS NOT NULL AND overview != ''"
     )
     movies_to_process = enriched_movies.limit(500).collect()
 

@@ -42,7 +42,7 @@ def fecth_partition(iterator):  # A iterator for each partition
         if not tmdbId:
             continue
 
-        url = f"https://api.themoviedb.org/3/movie/{tmdbId}?language=en-US"
+        url = f"https://api.themoviedb.org/3/movie/{tmdbId}?language=pt-BR"
         headers = {
             "accept": "application/json",
             "Authorization": f"Bearer {TMDB_API_KEY}",
@@ -68,7 +68,7 @@ def fecth_partition(iterator):  # A iterator for each partition
         time.sleep(0.1)
 
 
-def fecth_tmdb(limit: int | None = 100):
+def fecth_tmdb(limit: int | None = 500):
     spark = get_spark_session("Fetching tmdb details")
     try:
         links_df = (
