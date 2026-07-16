@@ -6,7 +6,7 @@ x-airflow-common: &airflow-common
   environment: &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
     AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:admin@postgres/lakehouse
     AIRFLOW_CONN_SPARK_DEFAULT: "spark://spark-master:7077?deploy_mode=client"
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
     ICEBERG_REST_URI: "http://iceberg-rest:8181"
@@ -32,7 +32,7 @@ x-spark-common: &spark-common
     context: ./docker/spark
     dockerfile: Dockerfile
   image: my_spark:4.0.3
-  user: root
+  user: "185:0"
   volumes:
     - ./transformations:/opt/spark/transformations
     - ./spark_config.py:/opt/spark/spark_config.py
@@ -44,9 +44,9 @@ services:
     image: pgvector/pgvector:pg16
     container_name: postgres
     environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: airflow
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: lakehouse
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
       - ./docker/postgres/initdb:/docker-entrypoint-initdb.d
@@ -55,7 +55,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "airflow"]
+      test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 10s
       retries: 5
       start_period: 5s
@@ -75,9 +75,9 @@ services:
       - CATALOG_WAREHOUSE=s3://warehouse/
       - CATALOG_IO__IMPL=org.apache.iceberg.aws.s3.S3FileIO
       - CATALOG_S3_ENDPOINT=http://minio:9000
-      - CATALOG_URI=jdbc:postgresql://postgres:5432/airflow
-      - CATALOG_JDBC_USER=airflow
-      - CATALOG_JDBC_PASSWORD=airflow
+      - CATALOG_URI=jdbc:postgresql://postgres:5432/lakehouse
+      - CATALOG_JDBC_USER=postgres
+      - CATALOG_JDBC_PASSWORD=admin
 
   minio:
     image: minio/minio

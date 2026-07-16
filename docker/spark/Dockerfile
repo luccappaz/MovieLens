@@ -7,3 +7,5 @@ RUN cd /opt/spark/jars && \
     curl -fLO https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-aws/1.11.0/iceberg-aws-1.11.0.jar && \
     curl -fLO https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.4.0/hadoop-aws-3.4.0.jar && \
     curl -fLO https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.23.19/bundle-2.23.19.jar
+
+USER 185

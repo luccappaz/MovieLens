@@ -24,9 +24,9 @@ OLLAMA_EMBED_MODEL = "nomic-embed-text"
 
 PG_HOST = os.environ.get("POSTGRES_HOST", "localhost")
 PG_PORT = "5432"
-PG_USER = "airflow"
-PG_PASS = "airflow"
-PG_DB = "airflow"
+PG_USER = "postgres"
+PG_PASS = "admin"
+PG_DB = "lakehouse"
 
 
 @st.cache_resource
