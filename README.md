@@ -4,11 +4,7 @@
 
 End-to-end recommendation system combining modern Data Engineering, Machine Learning, and Generative AI.
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue) ![Spark](https://img.shields.io/badge/Apache-Spark-orange)
-
-![Iceberg](https://img.shields.io/badge/Apache-Iceberg-blue)![Airflow](https://img.shields.io/badge/Airflow-Workflow-red)
-
-![Ollama](https://img.shields.io/badge/Ollama-RAG-green)![License](https://img.shields.io/badge/license-MIT-success)
+![Python](https://img.shields.io/badge/Python-3.10+-blue) ![Spark](https://img.shields.io/badge/Apache-Spark-orange)![Iceberg](https://img.shields.io/badge/Apache-Iceberg-blue)![Airflow](https://img.shields.io/badge/Airflow-Workflow-red)![Ollama](https://img.shields.io/badge/Ollama-RAG-green)![License](https://img.shields.io/badge/license-MIT-success)
 
 ## About
 
