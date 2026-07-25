@@ -1,5 +1,6 @@
-from spark_config import get_spark_session
 from pyspark.sql.functions import col, from_unixtime
+
+from spark_config import get_spark_session
 
 
 def main():

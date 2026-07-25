@@ -1,11 +1,15 @@
-FROM apache/airflow:3.3.0-python3.12
+FROM python:3.10-slim-bookworm AS python310
 
+FROM apache/airflow:3.3.0-python3.12
 USER root
 RUN apt-get update \
     && apt-get install -y --no-install-recommends openjdk-17-jre-headless curl \
     && apt-get autoremove -yqq --purge \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Traz um Python 3.10 completo pra imagem, isolado em /opt
+COPY --from=python310 /usr/local /opt/python3.10
 
 USER airflow
 RUN pip install --no-cache-dir \
@@ -18,3 +22,7 @@ RUN cd /home/airflow/.local/lib/python3.12/site-packages/pyspark/jars && \
     curl -fLO https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-aws/1.11.0/iceberg-aws-1.11.0.jar && \
     curl -fLO https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.4.0/hadoop-aws-3.4.0.jar && \
     curl -fLO https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.23.19/bundle-2.23.19.jar
+
+# Instala as libs que os scripts do driver precisam, no Python 3.10 isolado
+RUN /opt/python3.10/bin/python3.10 -m pip install --no-cache-dir \
+    requests psycopg2-binary python-dotenv

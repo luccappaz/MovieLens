@@ -1,10 +1,12 @@
-import sys
 import os
-from pyspark.sql import SparkSession
-import streamlit as st
-import requests
-import psycopg2
+import sys
+
 import pandas as pd
+import psycopg2
+import requests
+import streamlit as st
+from botocore.vendored.requests.exceptions import RequestException
+from pyspark.sql import SparkSession
 
 try:
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -52,7 +54,7 @@ def get_recommendations(user_id: int):
             ORDER BY rec.score DESC
             LIMIT 10
         """).toPandas()
-    except Exception as e:
+    except RequestException as e:
         st.error(f"Erro ao consultar a camada Gold: {e}")
         return None
 
@@ -68,7 +70,7 @@ def get_user_history(user_id: int):
             WHERE r.userId = {user_id}
             ORDER BY r.timestamp DESC
         """).toPandas()
-    except Exception as e:
+    except RequestException as e:
         st.error(f"Erro ao consultar o histórico: {e}")
         return None
 
@@ -82,7 +84,7 @@ def semantic_search(query_text: str, limit: int = 5):
             st.error(f"Erro no Ollama: Erro {response.status_code}")
             return None
         query_vector = response.json().get("embedding")
-    except Exception as e:
+    except RequestException as e:
         st.error(f"Falha ao conectar-se com o Ollama local: {e}")
         return None
 
@@ -93,7 +95,7 @@ def semantic_search(query_text: str, limit: int = 5):
         cur = conn.cursor()
 
         cur.execute(
-            """ 
+            """
             SELECT title, genres, overview, 1 - (embedding <=> %s::vector) AS similarity
             FROM movie_embeddings
             ORDER BY embedding <=> %s::vector
@@ -109,7 +111,7 @@ def semantic_search(query_text: str, limit: int = 5):
         return pd.DataFrame(
             results, columns=["Filmes", "Gêneros", "Sinopse", "Similaridade"]
         )
-    except Exception as e:
+    except RequestException as e:
         st.error(f"Erro ao consultar o Banco Vetorial (Postgres): {e}")
         return None
 

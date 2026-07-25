@@ -1,7 +1,9 @@
-import sys
 import os
-import requests
+import sys
+
 import psycopg2
+import requests
+from requests.exceptions import RequestException
 
 try:
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -33,7 +35,7 @@ def get_embedding(text: str) -> list | None:
         )
         if response.status_code == 200:
             return response.json().get("embedding")
-    except Exception as e:
+    except RequestException as e:
         print(f"❌ Falha ao conectar ao Ollama: {e}")
         return None
 
@@ -46,7 +48,7 @@ def init_vector_db():
     cur = conn.cursor()
 
     cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
-    cur.execute(""" 
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS movie_embeddings (
             movieId INTEGER PRIMARY KEY,
             title VARCHAR(255),
@@ -81,7 +83,7 @@ def run_vectorization():
 
         if vector:
             pg_cur.execute(
-                """ 
+                """
                 INSERT INTO movie_embeddings (movieId, title, genres, overview, embedding)
                 VALUES (%s, %s, %s, %s, %s)
                 ON CONFLICT (movieId) DO UPDATE

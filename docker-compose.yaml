@@ -8,7 +8,11 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:admin@postgres/lakehouse
     AIRFLOW_CONN_SPARK_DEFAULT: "spark://spark-master:7077?deploy_mode=client"
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: "http://airflow-apiserver:8080/execution/"
+    AIRFLOW__API_AUTH__JWT_SECRET: "8ef2dfa5043924dee1450b6b74183e7ec90ada5eac21a1eb7117512ea6ccee29"
+    AIRFLOW__API__SECRET_KEY: "23d99ecd2d9e8734556db4d597d438590c6ccd5057958f98f5b1cae390bed629"
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'false'
     ICEBERG_REST_URI: "http://iceberg-rest:8181"
     OLLAMA_API_URL: "http://host.docker.internal:11434/api/embeddings"
     S3_ENDPOINT: "http://minio:9000"
@@ -19,7 +23,9 @@ x-airflow-common: &airflow-common
     - ./airflow_logs:/opt/airflow/logs
     - ./transformations:/opt/spark/transformations
     - ./ingestions:/opt/airflow/ingestions
+    - ./ingestions:/opt/spark/ingestions
     - ./spark_config.py:/opt/spark/spark_config.py
+    - ./.env:/opt/spark/.env
   user: "${AIRFLOW_UID:-50000}:0"
   networks:
     - iceberg_net
@@ -33,8 +39,11 @@ x-spark-common: &spark-common
     dockerfile: Dockerfile
   image: my_spark:4.0.3
   user: "185:0"
+  environment:
+    - SPARK_PUBLIC_DNS=localhost
   volumes:
     - ./transformations:/opt/spark/transformations
+    - ./ingestions:/opt/spark/ingestions
     - ./spark_config.py:/opt/spark/spark_config.py
   networks:
     - iceberg_net
@@ -137,6 +146,8 @@ services:
         "org.apache.spark.deploy.worker.Worker",
         "spark://spark-master:7077",
       ]
+    ports:
+      - "8081:8081"
 
   airflow-dag-processor:
     <<: *airflow-common
@@ -165,6 +176,8 @@ services:
     container_name: airflow-scheduler
     command: scheduler
     restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
@@ -177,11 +190,20 @@ services:
     command:
       - -c
       - |
+        set -e
+
         echo "Inicializando diretórios e permissões..."
         mkdir -p /opt/airflow/{logs,dags}
         chown -R "${AIRFLOW_UID:-50000}:0" /opt/airflow/
+
         echo "Executando migração do banco de dados relacional..."
         /entrypoint airflow db migrate
+
+        echo "Criando pool spark_pool..."
+        /entrypoint airflow pools set spark_pool 2 "Pool for Spark jobs"
+
+        echo "Pools existentes:"
+        /entrypoint airflow pools list
     environment:
       <<: *airflow-common-env
       _AIRFLOW_DB_MIGRATE: "true"

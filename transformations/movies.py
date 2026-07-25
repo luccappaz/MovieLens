@@ -1,5 +1,6 @@
+from pyspark.sql.functions import col, regexp_extract, regexp_replace, split
+
 from spark_config import get_spark_session
-from pyspark.sql.functions import col, regexp_extract, split, regexp_replace
 
 
 def main():

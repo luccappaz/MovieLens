@@ -1,5 +1,6 @@
-from pyspark.sql import SparkSession
 import os
+
+from pyspark.sql import SparkSession
 
 REST_URI = os.environ.get("ICEBERG_REST_URI", "http://localhost:8181")
 S3_ENDPOINT = os.environ.get("S3_ENDPOINT", "http://localhost:9000")

@@ -1,16 +1,18 @@
 import os
-from pathlib import Path
+import sys
 import time
+from pathlib import Path
+
 import requests
 from dotenv import load_dotenv
-import sys
 from pyspark.sql.types import (
-    StructType,
-    StructField,
+    DoubleType,
     IntegerType,
     StringType,
-    DoubleType,
+    StructField,
+    StructType,
 )
+from requests.exceptions import RequestException
 
 try:
     root_dir = Path(__file__).resolve().parent.parent
@@ -62,7 +64,7 @@ def fecth_partition(iterator):  # A iterator for each partition
                 )
             else:
                 yield (int(movieId), int(tmdbId), "", "", 0, 0, 0.0)
-        except Exception:
+        except RequestException:
             yield (int(movieId), int(tmdbId), "", "", 0, 0, 0.0)
 
         time.sleep(0.1)

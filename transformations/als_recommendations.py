@@ -1,19 +1,20 @@
-from spark_config import get_spark_session
+from pyspark.ml.recommendation import ALS
 from pyspark.sql.functions import (
     col,
-    explode,
+    count,
     current_timestamp,
     datediff,
-    round,
-    count,
+    explode,
+    lit,
     log10,
+    max,
+    round,
     row_number,
     to_date,
-    max,
-    lit,
 )
 from pyspark.sql.window import Window
-from pyspark.ml.recommendation import ALS
+
+from spark_config import get_spark_session
 
 
 def main() -> None:
